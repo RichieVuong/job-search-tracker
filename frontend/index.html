@@ -270,8 +270,54 @@ function formatRelativeDate(value){if(!value)return '—';const date=new Date(va
 function filtered(items){return items.filter(a=>currentFilter==='all'||(currentFilter==='active'&&['Applied','Online Assessment','Interview In Progress'].includes(a.status))||(currentFilter==='interview'&&a.status==='Interview In Progress')||(currentFilter==='offer'&&a.status==='Offer')||(currentFilter==='rejected'&&a.status==='Rejected'));}
 function display(items){items=filtered(items); table.innerHTML=items.length?'':'<tr><td colspan="6" class="footer">No applications found</td></tr>'; for(const a of items){const r=document.createElement('tr');const initials=a.company.slice(0,2).toUpperCase();const stageClass=a.status==='Online Assessment'?'assessment':a.status==='Interview In Progress'?'interview':a.status==='Offer'?'offer':a.status==='Rejected'?'rejected':'';r.innerHTML=`<td><div class="company"><span class="avatar">${escapeHtml(initials)}</span><span>${escapeHtml(a.company)}<small class="sub">${escapeHtml(a.company.toLowerCase())}.com</small></span></div></td><td>${escapeHtml(a.role)}</td><td><button class="pill status-button ${stageClass}" data-id="${a.id}">${a.status}</button></td><td>${formatDate(a.created_at)}</td><td>${formatRelativeDate(a.updated_at)}</td><td><button class="delete-button" data-id="${a.id}" aria-label="Delete ${escapeHtml(a.company)}" title="Delete application"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7l1-3h4l1 3"></path></svg></button></td>`;r.querySelector('.status-button').onclick=updateStatus;r.querySelector('.delete-button').onclick=deleteApplication;r.tabIndex=0;r.title="Open application details";r.onclick=e=>{if(!e.target.closest("button"))openDetails(a,r);};r.onkeydown=e=>{if(e.target===r&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetails(a,r);}};table.appendChild(r);}}
 let loadVersion=0;async function load(){const version=++loadVersion;const [recent,stats]=await Promise.all([checkedFetch(document.getElementById('search-term').value.trim()?'/applications/search?company='+encodeURIComponent(document.getElementById('search-term').value.trim()):'/applications/recent').then(r=>r.json()),checkedFetch('/applications/stats').then(r=>r.json())]);if(version!==loadVersion)return;recent.sort((a,b)=>sortNewest?b.updated_at.localeCompare(a.updated_at)||b.id-a.id:a.updated_at.localeCompare(b.updated_at)||a.id-b.id);display(recent);for(const [id,val] of Object.entries({'longest-streak':stats.longest_streak+' days','application-count':stats.total,'active-count':stats.active,'interview-count':stats.interviews,'offer-count':stats.offers,'sidebar-total':stats.total,'streak-count':stats.streak,'header-streak-count':stats.streak,'today-count':stats.today_count,'week-total':stats.week_total}))document.getElementById(id).textContent=val;document.getElementById('goal-progress').style.width=Math.min(stats.today_count/5*100,100)+'%';document.getElementById('goal-message').textContent=stats.today_count>=5?'Goal complete!':(5-stats.today_count)+' more to go!';const bars=document.querySelectorAll('#activity-bars i');const max=Math.max(...stats.week_activity,1);stats.week_activity.forEach((count,index)=>bars[index].style.height=Math.max(count/max*85,8)+'%');}
-function updateStatus(e){pendingStatusId=e.target.dataset.id;document.getElementById('new-status').value=e.target.closest('tr').querySelector('.status-button').textContent.replace('⌄','');statusModal.classList.add('open');}
-document.getElementById('confirm-status').onclick=async()=>{await checkedFetch('/applications/'+pendingStatusId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:document.getElementById('new-status').value})});statusModal.classList.remove('open');await load();}
+// Keep server data separate from temporary, optimistic status changes.
+let visibleApplications=[];
+const savingStatuses=new Map();
+const renderApplications=display;
+display=function(items){
+  visibleApplications=items;
+  renderApplications(items.map(a=>savingStatuses.has(String(a.id))?{...a,status:savingStatuses.get(String(a.id))}:a));
+  table.querySelectorAll('.status-button').forEach(button=>{
+    button.disabled=savingStatuses.has(button.dataset.id);
+    button.setAttribute('aria-busy',String(button.disabled));
+    button.title=button.disabled?'Saving status…':'Update status';
+  });
+};
+function updateStatus(e){
+  const button=e.currentTarget;
+  if(savingStatuses.has(button.dataset.id))return;
+  pendingStatusId=button.dataset.id;
+  document.getElementById('new-status').value=button.textContent;
+  statusModal.classList.add('open');
+}
+document.getElementById('confirm-status').onclick=async()=>{
+  const id=pendingStatusId;
+  if(!id||savingStatuses.has(id))return;
+  const status=document.getElementById('new-status').value;
+  pendingStatusId=null;
+  statusModal.classList.remove('open');
+  document.getElementById('request-error').hidden=true;
+  savingStatuses.set(id,status);
+  ++loadVersion; // Ignore reads started before this edit.
+  display(visibleApplications);
+  let saved=false;
+  try{
+    const response=await checkedFetch('/applications/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+    const updated=await response.json();
+    visibleApplications=visibleApplications.map(a=>String(a.id)===id?updated:a);
+    saved=true;
+  }catch(error){
+    const message=document.getElementById('request-error');
+    message.textContent='Could not save the status. The previous status has been restored. Please try again.';
+    message.hidden=false;
+  }finally{
+    ++loadVersion;
+    savingStatuses.delete(id);
+    display(visibleApplications);
+  }
+  // Refresh counts and ordering separately; a refresh failure must not undo a saved edit.
+  if(saved)await load();
+};
 document.getElementById('cancel-status').onclick=()=>statusModal.classList.remove('open');
 function deleteApplication(e){pendingDeleteId=e.currentTarget.dataset.id;deleteModal.classList.add('open');}
 document.getElementById('cancel-delete').onclick=()=>deleteModal.classList.remove('open');
