@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Tracker — Start</title>
+  <style>
+    :root{--ink:#202638;--muted:#7b8498;--purple:#635bff;--line:#e9ebf2}
+    *{box-sizing:border-box}body{margin:0;background:#f7f8fc;color:var(--ink);font:13px Arial,sans-serif}
+    .page{max-width:1120px;min-height:100vh;margin:0 auto;padding:14px 22px;background:#fff;border-radius:0 0 12px 12px;box-shadow:0 2px 18px #26324d0d}
+    header{height:42px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:18px;font-weight:700;display:flex;gap:10px;align-items:center}.brand-icon{color:var(--purple);font-size:19px}.nav{display:flex;align-items:center;gap:20px;color:var(--muted);font-size:11px}.nav a{color:inherit;text-decoration:none}.login{color:var(--ink);text-decoration:none}.button{background:var(--purple);color:#fff;border:0;border-radius:6px;padding:9px 14px;text-decoration:none;box-shadow:0 6px 14px #635bff35}
+    .hero{min-height:calc(100vh - 70px);display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:44px;padding:32px 28px 70px}.eyebrow{color:#635bff;font-weight:700;margin-bottom:12px}.hero h1{font-size:38px;line-height:1.08;letter-spacing:-1.4px;margin:0 0 15px}.hero h1 span{color:var(--purple)}.hero p{color:var(--muted);line-height:1.6;max-width:360px;margin:0 0 22px}.checks{display:grid;gap:10px;color:#59637a;font-size:11px;margin-bottom:25px}.checks span::before{content:'✓';display:inline-grid;place-items:center;width:16px;height:16px;margin-right:8px;border-radius:50%;background:#e8f8ee;color:#37a55a;font-weight:700}.preview{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff;box-shadow:0 14px 35px #26324d12;transform:rotate(1deg)}.preview-bar{display:flex;gap:5px;margin-bottom:12px}.dot{width:6px;height:6px;border-radius:50%;background:#dedff0}.preview-row{display:grid;grid-template-columns:1fr 1fr 52px;gap:7px;align-items:center;padding:9px 5px;border-top:1px solid #f0f1f6;font-size:9px}.mini-pill{height:8px;width:35px;border-radius:9px;background:#e9f1ff}.mini-pill.purple{background:#f0eaff}.mini-pill.red{background:#ffe7eb}.cta-note{font-size:10px;color:var(--muted);margin-left:12px}
+    @media(max-width:700px){.nav{gap:10px}.hero{grid-template-columns:1fr;padding:30px 10px}.hero h1{font-size:32px}.preview{transform:none}}
+    :root{--ink:#303345;--muted:#63677b;--purple:#7763d7;--line:#eeedf3}
+    body{background:#f6f5f9;font:14px/1.6 'Segoe UI',system-ui,sans-serif}
+    .page{max-width:1280px;padding:28px 36px;background:transparent;box-shadow:none}
+    header{height:auto;min-height:46px;gap:20px}.brand{color:var(--ink);text-decoration:none;font-size:20px;letter-spacing:-.6px}
+    .brand-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:#eae5fa;color:var(--purple)}
+    .nav{gap:24px;font-size:12px}.nav .button{color:white}.button{display:inline-flex;align-items:center;border-radius:11px;padding:12px 20px;background:var(--purple);box-shadow:0 4px 12px #7763d720;font-weight:600}.button:hover{background:#6854c5}
+    a:focus-visible{outline:3px solid #c9bff3;outline-offset:5px}
+    .hero{min-height:0;padding:55px 0 45px;gap:56px;align-items:center}
+    .eyebrow{display:inline-block;background:#eeebf7;border:1px solid #e5dff4;border-radius:25px;padding:6px 12px;color:#806ab2;font-size:10px;letter-spacing:.05em;margin-bottom:20px}
+    .hero h1{font-size:clamp(34px,4.5vw,56px);line-height:1.12;font-weight:650;letter-spacing:-2px;margin-bottom:22px}
+    .hero p{font-size:16px;max-width:420px;line-height:1.7;margin-bottom:24px}
+    .checks{font-size:12px;gap:12px;margin-bottom:28px;color:#777487}.checks span::before{background:#e6f0e9;color:#67917a;width:20px;height:20px}
+    .cta-note{display:block;margin:12px 0 0;font-size:11px}
+    .preview{border:12px solid #ece8f6;border-radius:25px;padding:22px;background:#fff;box-shadow:0 16px 38px #6654870c;transform:none}
+    .preview-bar{align-items:center;margin-bottom:24px;gap:6px}.preview-label{margin-left:auto;font-size:10px;letter-spacing:.07em;color:#6d5b92;font-weight:600}
+    .dot{width:7px;height:7px;background:#d9d0ee}
+    .preview-row{grid-template-columns:1fr 1fr 80px;padding:22px 4px;font-size:11px;border-color:var(--line)}.preview-row b{font-weight:600}.preview-row>span{font-size:10px;color:var(--muted)}
+    .mini-pill{height:auto;width:auto;padding:5px 8px;font-style:normal;text-align:center;font-size:9px;color:#567abd;background:#edf2fd}.mini-pill::after{content:'Applied'}.mini-pill.purple{background:#f0ebfb;color:#8562bd}.mini-pill.purple::after{content:'Assessment'}.mini-pill.red{background:#faeaee;color:#ba647b}.mini-pill.red::after{content:'Rejected'}
+    .closing{padding:25px 0;border-top:1px solid #e8e4ef;color:var(--muted);display:flex;justify-content:space-between;gap:20px;font-size:12px}
+    @media(max-width:900px){.hero{gap:24px}.preview{padding:15px}.nav{gap:14px}}
+    @media(max-width:700px){.page{padding:20px}header{flex-wrap:wrap}.brand{font-size:18px}.nav{width:100%;justify-content:space-between;gap:10px}.hero{grid-template-columns:1fr;padding:32px 0;gap:30px}.hero h1{letter-spacing:-1.3px}.hero p{font-size:15px}.preview-row{padding:18px 0}.closing{flex-wrap:wrap}}
+    html{scroll-behavior:smooth}
+    .landing-account{position:relative}
+    .nav [hidden]{display:none!important}
+    .account-toggle{display:flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--purple);padding:4px;cursor:pointer;font:inherit}
+    .account-toggle[hidden],.landing-menu[hidden]{display:none}
+    .account-initials{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:#eef0ff;font-size:10px;font-weight:700}
+    .account-toggle::after{content:'';width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-top:-3px}
+    .account-toggle:focus-visible,.landing-menu button:focus-visible{outline:3px solid #c9bff3;outline-offset:3px}
+    .landing-menu{position:absolute;right:0;top:42px;z-index:10;width:220px;max-width:85vw;padding:16px;background:white;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 24px #17203318}
+    .landing-menu strong{display:block;color:var(--ink);overflow-wrap:anywhere}
+    .landing-menu .account-email{font-size:11px;color:var(--muted);overflow-wrap:anywhere;padding-bottom:12px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+    .landing-menu a,.landing-menu button{display:block;width:100%;padding:9px 6px;border:0;border-radius:7px;background:white;text-align:left;font:inherit;cursor:pointer}
+    .landing-menu a:hover{background:#f4f1fb;color:var(--purple)}
+    .landing-menu button{color:#ba647b}.landing-menu button:hover{background:#faeaee}
+    .nav .login.signed-in{width:28px;height:28px;display:inline-grid;place-items:center;flex-shrink:0;border-radius:50%;background:#eef0ff;color:var(--purple);font-size:10px;font-weight:700;text-decoration:none}
+    .content-section{scroll-margin-top:28px;padding:30px 0 42px}
+    .section-label{color:var(--purple);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+    .content-section h2{font-size:28px;line-height:1.25;letter-spacing:-.8px;font-weight:650;margin:9px 0 12px}
+    .section-intro{color:var(--muted);margin:0 0 24px;max-width:560px}
+    .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .feature-card{padding:24px;background:#fff;border:1px solid var(--line);border-radius:16px}
+    .feature-icon{display:grid;place-items:center;width:36px;height:36px;background:#eee9fa;color:#8771bb;border-radius:11px}
+    .feature-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .feature-card:nth-child(2) .feature-icon{background:#e8f2ed;color:#67917a}
+    .feature-card:nth-child(3) .feature-icon{background:#fff1e5;color:#b88a61}
+    .feature-card h3{font-size:15px;font-weight:600;margin:16px 0 8px}
+    .feature-card p{font-size:13px;color:var(--muted);margin:0;line-height:1.75}
+    .about-card{display:grid;grid-template-columns:1fr 1.4fr;gap:38px;background:#eeebf6;border:1px solid #e5dff1;border-radius:20px;padding:36px}
+    .about-copy p{color:#6c687e;line-height:1.85;margin:0 0 16px}
+    .about-copy p:last-child{margin-bottom:0}
+    .about-signoff{font-size:12px;color:#8874b1!important;font-weight:600}
+    @media(max-width:700px){.feature-grid,.about-card{grid-template-columns:1fr}.about-card{padding:24px;gap:12px}.content-section h2{font-size:25px}.feature-card{padding:22px}}
+    .checks{color:#636073}
+    .eyebrow{color:#6e548f}
+    .preview-row>span{font-size:11px}
+    .mini-pill{font-size:10px;color:#42649f}
+    .mini-pill.purple{color:#72509f}.mini-pill.red{color:#a14861}
+    .about-signoff{color:#6e548f!important}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+    .site-header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:24px;min-height:64px;padding-bottom:20px;border-bottom:1px solid #e8e4ef}
+    .site-header .brand{justify-self:start;white-space:nowrap}
+    .site-header .nav{justify-self:center;display:flex;justify-content:center;width:auto;gap:30px;font-size:13px;font-weight:600}
+    .site-header .nav a{padding:8px 0;transition:color .15s}
+    .site-header .nav a:hover{color:var(--purple)}
+    .site-header>.button{justify-self:end;white-space:nowrap;font-size:12px;text-decoration:none}
+    @media(max-width:800px){.site-header{grid-template-columns:minmax(0,1fr) auto;gap:16px}.site-header .nav{grid-column:1 / -1;grid-row:2}.site-header>.button{grid-column:2;grid-row:1}.site-header .brand{font-size:17px}}
+    @media(max-width:380px){.site-header .brand{font-size:14px;gap:6px}.site-header>.button{padding:10px 12px}.site-header{gap:10px}}
+    .site-header{grid-template-columns:1fr auto}
+    .site-header .nav{justify-self:end}
+    .goal-box{background:white;border:1px solid var(--line);border-radius:16px;padding:24px;max-width:760px}
+    #goal-form{display:flex;gap:10px;margin-bottom:16px}#goal-form[hidden]{display:none}
+    #goal-input{flex:1;min-width:0;padding:12px;border:1px solid #ddd9e8;border-radius:10px;font:inherit}
+    #goal-form button{border:0;cursor:pointer;font:inherit}
+    .goal-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+    .goal-row input{accent-color:var(--purple);width:18px;height:18px;flex-shrink:0}
+    .goal-row:has(input:checked) span{text-decoration:line-through;color:var(--muted)}
+    #goal-message{color:var(--muted);font-size:13px}
+    @media(max-width:800px){.site-header .nav{grid-column:auto;grid-row:auto}}
+    @media(max-width:550px){.site-header{grid-template-columns:1fr}.site-header .nav{justify-self:end}#goal-form{flex-wrap:wrap}}
+  </style>
+</head>
+<body><div class="page">
+  <header class="site-header"><a class="brand" href="/start"><span class="brand-icon" aria-hidden="true">▣</span>Application Tracker</a><nav class="nav" aria-label="Main navigation"><a href="#features">Features</a><a href="#about">About</a><a href="#goals">Goals</a></nav></header>
+  <main><div class="hero"><section><div class="eyebrow">YOUR JOB SEARCH, ORGANIZED</div><h1>Stay on top of every <span>job application.</span></h1><p>Track applications, interviews, offers, and your progress—all in one place.</p><div class="checks"><span>Track unlimited applications</span><span>Monitor your progress</span><span>Stay consistent with daily goals</span></div><a class="button" href="/auth/google">Start tracking free</a><span class="cta-note">No credit card required</span></section><section class="preview" aria-label="Example tracker with sample applications"><div class="preview-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="preview-label">EXAMPLE · SAMPLE DATA</span></div><div class="preview-row"><b>Duolingo</b><span>Swe Intern</span><i class="mini-pill purple"></i></div><div class="preview-row"><b>Google</b><span>SWE Intern</span><i class="mini-pill"></i></div><div class="preview-row"><b>Apple</b><span>SWE Intern</span><i class="mini-pill"></i></div><div class="preview-row"><b>TestCo</b><span>Intern</span><i class="mini-pill red"></i></div><div class="preview-row"><b>Sig</b><span>Intern</span><i class="mini-pill red"></i></div></section></div>
+  <section class="content-section" id="features" aria-labelledby="features-title">
+    <span class="section-label">The simple things, done well</span>
+    <h2 id="features-title">A little less to keep in your head.</h2>
+    <p class="section-intro">Job hunting already takes enough energy. Keeping track of it should be the easy part.</p>
+    <div class="feature-grid">
+      <article class="feature-card"><span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></span><h3>Add it and get on with your day</h3><p>Save the company and role after you apply. Your application starts as Applied, so there’s no extra setup to slow you down.</p></article>
+      <article class="feature-card"><span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m8 12 3 3 5-6"/></svg></span><h3>Know where things stand</h3><p>Update each stage as you hear back, from online assessments and interviews to offers. Search by company or filter by stage when you need a quick look.</p></article>
+      <article class="feature-card"><span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19V13M12 19V9M19 19V5M3 21h18"/></svg></span><h3>See the progress you’re making</h3><p>Check your application count, daily goal, and weekly activity. Small steps can be easy to overlook—give yourself a moment to see them.</p></article>
+    </div>
+  </section>
+  <section class="content-section" id="about" aria-labelledby="about-title">
+    <div class="about-card"><div><span class="section-label">Why I built this</span><h2 id="about-title">From one job seeker<br>to another.</h2></div>
+    <div class="about-copy"><p>I started building Application Tracker while looking for jobs myself. I wanted a simple way to keep track of where I’d applied and what stage each application was at.</p><p>The idea was straightforward: add an application, update it when something changes, and have one place to come back to. That’s what I wanted this tracker to be—a small, useful tool that makes the job search feel a little more organized.</p><p class="about-signoff">Built from a need I had. Hopefully useful for you, too.</p></div></div>
+  </section>
+  <section class="content-section" id="goals" aria-labelledby="goals-title">
+    <span class="section-label">Small steps count</span><h2 id="goals-title">What do you want to work toward?</h2>
+    <p class="section-intro">Make it specific and manageable: apply to five roles this week, improve one resume bullet, or practice an interview answer. Your goals are private to your account.</p>
+    <div class="goal-box"><form id="goal-form" hidden><label for="goal-input" class="goal-label" hidden>Your goal</label><input id="goal-input" aria-label="Your goal" placeholder="Write a small goal…" required maxlength="300"><button class="button" type="submit">Add goal</button></form><p id="goal-message" role="status">Sign in through the main button above to save your goals.</p><div id="goal-list"></div></div>
+  </section>
+  </main>
+<footer class="closing"><span>A little progress, every day.</span></footer>
+</div>
+<script>
+const trackingLinks = [...document.querySelectorAll('a[href="/auth/google"]')];
+const signedOutLabels = trackingLinks.map(link => link.textContent);
+const goalForm=document.getElementById('goal-form'),goalList=document.getElementById('goal-list'),goalMessage=document.getElementById('goal-message');
+async function loadGoals(){
+  const response=await fetch('/goals',{cache:'no-store'});
+  if(!response.ok)throw new Error('Goals could not load. If the server was just updated, restart it and refresh.');
+  const goals=await response.json();goalList.replaceChildren();
+  goalMessage.textContent=goals.length?'Check off a goal when you complete it.':'No goals yet. Start with one small step.';
+  for(const goal of goals){
+    const row=document.createElement('label');row.className='goal-row';
+    const check=document.createElement('input');check.type='checkbox';check.checked=Boolean(goal.completed);
+    const text=document.createElement('span');text.textContent=goal.text;row.append(check,text);goalList.append(row);
+    check.onchange=async()=>{check.disabled=true;try{const saved=await fetch('/goals/'+goal.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({completed:check.checked})});if(!saved.ok)throw new Error();}catch{check.checked=!check.checked;goalMessage.textContent='Could not save. Please try again.';}finally{check.disabled=false;}};
+  }
+}
+goalForm.onsubmit=async event=>{
+ event.preventDefault();const input=document.getElementById('goal-input'),button=goalForm.querySelector('button');
+ if(!input.value.trim())return;button.disabled=true;
+ try{const response=await fetch('/goals',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:input.value.trim()})});if(!response.ok)throw new Error('Could not save your goal. Please try again.');input.value='';await loadGoals();}
+ catch(error){goalMessage.textContent=error.message;}finally{button.disabled=false;}
+};
+async function syncAccount() {
+  try {
+    const response = await fetch('/auth/me', {credentials:'same-origin', cache:'no-store'});
+    if (!response.ok) return;
+    const user = await response.json();
+    goalForm.hidden=!user;
+    if(user){try{await loadGoals();}catch(error){goalMessage.textContent=error.message;}}
+    else{goalList.replaceChildren();goalMessage.textContent='Sign in through the main button above to save your goals.';}
+    trackingLinks.forEach((link, index) => {
+      link.href = user ? '/app' : '/auth/google';
+      link.textContent = user ? 'Open tracker' : signedOutLabels[index];
+    });
+  } catch (error) {
+    // Standard Google sign-in remains available if the connection is interrupted.
+  }
+}
+window.addEventListener('pageshow', syncAccount);
+window.addEventListener('focus', syncAccount);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncAccount(); });
+</script>
+</body></html>

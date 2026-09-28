@@ -1,0 +1,12 @@
+.venv/
+.env
+.database-config.json
+*.db
+*.db-*
+.session-secret
+__pycache__/
+*.pdf
+*.png
+*.tex
+backups/
+tmp/

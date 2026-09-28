@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Tracker</title>
+    <style>
+        :root { --ink:#202638; --muted:#7b8498; --line:#e9ebf2; --purple:#635bff; }
+        * { box-sizing:border-box; }
+        body { margin:0; background:#f7f8fc; color:var(--ink); font:13px Arial,sans-serif; }
+        .page { max-width:1120px; min-height:100vh; margin:0 auto; padding:14px 22px 12px; background:#fff; border-radius:0 0 12px 12px; box-shadow:0 2px 18px #26324d0d; }
+        header { height:42px; display:flex; align-items:center; justify-content:space-between; margin-bottom:13px; }
+        .header-actions { display:flex; align-items:center; gap:18px; }
+        .login-button { background:#fff; color:var(--ink); border:1px solid #dfe3ed; border-radius:6px; padding:9px 12px; }
+        .login-button:hover { border-color:var(--purple); color:var(--purple); }
+        .account { position:relative; }
+        .account-button { display:none; align-items:center; gap:6px; background:transparent; color:var(--ink); font-weight:700; }
+        .account-caret { width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg) translateY(-2px); margin-left:1px; }
+        .account-avatar { width:28px; height:28px; display:grid; place-items:center; border-radius:50%; background:#eef0ff; color:var(--purple); font-size:10px; }
+        .account-menu { display:none; position:absolute; right:0; top:36px; z-index:5; width:190px; padding:12px; background:#fff; border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 24px #17203320; }
+        .account-menu.open { display:block; }
+        .account-name { font-weight:700; margin-bottom:3px; }
+        .account-email { color:var(--muted); font-size:11px; padding-bottom:10px; border-bottom:1px solid var(--line); }
+        .account-link { display:block; width:100%; padding:8px 4px; text-align:left; color:var(--ink); background:#fff; border-radius:5px; font-size:11px; }
+        .account-link:hover { background:#f4f3ff; color:var(--purple); }
+        .logout-button { width:100%; margin-top:8px; padding:7px; text-align:left; color:#e85268; background:#fff; border-radius:5px; }
+        .logout-button:hover { background:#fff0f2; }
+        .header-streak { color:#f57b18; font-weight:700; font-size:13px; }
+        .brand { display:flex; align-items:center; gap:11px; font-size:18px; font-weight:700; letter-spacing:-.35px; }
+        .brand-icon { color:var(--purple); font-size:19px; }
+        button { border:0; cursor:pointer; font:inherit; }
+        .add-button { background:var(--purple); color:white; border-radius:6px; padding:9px 14px; box-shadow:0 6px 14px #635bff35; }
+        .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+        .stat { background:#fff; border:1px solid var(--line); border-radius:8px; min-height:61px; padding:11px 14px; display:flex; align-items:center; gap:11px; }
+        .stat-icon { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; background:#f0efff; color:var(--purple); font-size:16px; }
+        .stat:nth-child(2) .stat-icon { background:#eef5ff; color:#4b86eb; }
+        .stat:nth-child(3) .stat-icon { background:#edfbf1; color:#47ad6a; }
+        .stat:nth-child(4) .stat-icon { background:#fff8e9; color:#eba827; }
+        .stat-number { display:block; font-size:17px; font-weight:700; margin-bottom:3px; }
+        .stat-label { color:var(--muted); font-size:11px; font-weight:600; }
+        .sheet { background:#fff; border:1px solid var(--line); border-radius:9px; padding:12px 14px 8px; box-shadow:0 7px 25px #26324d08; }
+        .toolbar { display:flex; align-items:center; gap:7px; margin-bottom:12px; flex-wrap:nowrap; min-height:30px; }
+        .search-wrap { height:34px; display:flex; align-items:center; }
+        .search { width:218px; height:30px; border:1px solid #dfe3ed; border-radius:6px; padding:0 12px 0 29px; color:var(--ink); background:#fff; }
+        .search-wrap { position:relative; }
+        .search-icon { position:absolute; left:11px; top:10px; color:var(--muted); width:14px; height:14px; }
+        .filters { display:flex; gap:2px; }
+        .filter { height:30px; padding:0 10px; display:inline-flex; align-items:center; background:transparent; border-radius:6px; color:var(--ink); font-weight:600; white-space:nowrap; }
+        .filter.active { background:#f0efff; color:var(--purple); }
+        .sort { height:30px; margin-left:auto; border:1px solid #dfe3ed; padding:0 10px; border-radius:6px; background:#fff; color:var(--ink); white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+        .sort::after { content:''; width:6px; height:6px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg) translateY(-2px); transform-origin:center; }
+        table { width:100%; border-collapse:collapse; }
+        th { color:#8991a4; font-size:10px; text-align:left; letter-spacing:.08em; padding:4px 6px 11px; border-bottom:1px solid var(--line); font-weight:800; }
+        td { padding:9px 6px; border-bottom:1px solid var(--line); vertical-align:middle; font-weight:500; }
+        .company { display:flex; align-items:center; gap:9px; font-weight:700; }
+        .avatar { width:23px; height:23px; border-radius:6px; display:grid; place-items:center; color:white; background:#4caf50; font-size:9px; }
+        .sub { display:block; color:var(--muted); font-size:10px; font-weight:400; margin-top:2px; }
+        .pill { display:inline-block; padding:5px 10px; border-radius:20px; background:#edf4ff; color:#3378de; font-size:10px; font-weight:700; }
+        .pill.assessment { background:#f1edff; color:#6b50d9; }
+        .pill.interview { background:#fff4df; color:#d88914; }
+        .pill.offer { background:#e9f9ef; color:#2e9b58; }
+        .pill.rejected { background:#ffedf0; color:#e85268; }
+        .status-button { cursor:pointer; border:0; display:inline-flex; align-items:center; justify-content:center; gap:7px; line-height:1; }
+        .status-button::after { content:''; width:5px; height:5px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg) translateY(-2px); transform-origin:center; }
+        .menu { background:transparent; color:var(--muted); font-size:18px; }
+        .delete-button { width:28px; height:28px; display:inline-grid; place-items:center; background:transparent; color:#9aa2b3; border-radius:6px; }
+        .delete-button:hover { color:#e85268; background:#fff0f2; }
+        .delete-button svg { width:15px; height:15px; }
+        .actions { position:relative; }
+        .action-menu { display:none; position:absolute; right:0; top:24px; z-index:2; background:#fff; border:1px solid var(--line); border-radius:7px; box-shadow:0 8px 20px #17203320; padding:5px; min-width:130px; }
+        .action-menu.open { display:grid; }
+        .action-menu button { background:white; color:var(--ink); text-align:left; padding:8px; border-radius:5px; }
+        .action-menu button:hover { background:#f4f3ff; color:var(--purple); }
+        .footer { text-align:center; color:var(--muted); font-size:11px; padding:9px 0 0; width:100%; }
+        .dashboard-grid { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:12px; align-items:start; }
+        .primary { min-width:0; }
+        .side-card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:11px; margin-bottom:8px; }
+        .side-card p { margin:8px 0 0; }
+        .side-card h3 { font-size:12px; margin:0 0 12px; }
+        .streak { color:#f57b18; font-size:24px; font-weight:800; }
+        .side-muted { color:var(--muted); font-size:10px; }
+        .week { display:flex; justify-content:space-between; margin-top:12px; color:var(--muted); font-size:9px; }
+        .week span { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; border:1px solid var(--line); }
+        .week .done { background:#dff5e5; color:#299b50; border:0; }
+        .progress { height:6px; background:#edf0f5; border-radius:8px; overflow:hidden; margin:12px 0 7px; }
+        .progress i { display:block; width:80%; height:100%; background:var(--purple); }
+        .bars { height:45px; display:flex; align-items:end; justify-content:space-between; gap:6px; border-bottom:1px solid var(--line); }
+        .bars i { flex:1; background:#756cff; border-radius:2px 2px 0 0; }
+        .bars i:nth-child(1){height:25%}.bars i:nth-child(2){height:40%}.bars i:nth-child(3){height:60%}.bars i:nth-child(4){height:35%}.bars i:nth-child(5){height:85%}.bars i:nth-child(6){height:45%}.bars i:nth-child(7){height:20%}
+        @media(max-width:1050px) { .dashboard-grid { grid-template-columns:1fr; } .sidebar { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; } .side-card{margin:0} }
+        .modal { display:none; position:fixed; inset:0; background:#17203355; place-items:center; }
+        .modal.open { display:grid; }
+        .modal-card { background:white; border-radius:12px; padding:22px; width:340px; box-shadow:0 20px 50px #17203344; }
+        .modal-card h2 { margin:0 0 16px; }
+        .modal-card form { display:grid; gap:10px; }
+        .modal-card input { padding:10px; border:1px solid var(--line); border-radius:6px; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:5px; }
+        .danger { background:#e85268; color:white; padding:9px 13px; border-radius:6px; }
+        .status-modal select { width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-bottom:12px; }
+        .cancel { background:#f1f2f6; color:var(--ink); padding:9px 13px; border-radius:6px; }
+        @media(max-width:800px) { .stats{grid-template-columns:repeat(2,1fr)} .toolbar{flex-wrap:wrap}.sort{margin-left:0} .sheet{overflow:auto} }
+        /* Soft surfaces, comfortable spacing, and consistent controls. */
+        :root { --ink:#303345; --muted:#7a7d90; --line:#eeedf3; --purple:#7763d7; }
+        body { background:#f6f5f9; font:13px/1.5 'Segoe UI',system-ui,sans-serif; }
+        .page { max-width:1400px; padding:28px 36px; background:transparent; box-shadow:none; }
+        header { height:auto; min-height:46px; margin-bottom:30px; gap:20px; }
+        .brand { font-size:20px; letter-spacing:-.6px; color:inherit; text-decoration:none; }
+        .brand:focus-visible { outline:3px solid #c9bff3; outline-offset:5px; border-radius:8px; }
+        .brand-icon { display:grid; place-items:center; width:36px; height:36px; border-radius:11px; background:#eae5fa; }
+        .header-actions { gap:12px; }
+        .header-streak { font-size:12px; background:#fff0e5; color:#bc702f; padding:8px 12px; border-radius:20px; }
+        button,input,select { font-family:inherit; }
+        button { transition:background .15s,box-shadow .15s; }
+        button:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid #c9bff3; outline-offset:3px; }
+        .add-button { min-height:40px; padding:10px 17px; border-radius:10px; box-shadow:0 3px 8px #7763d720; font-weight:600; }
+        .add-button:hover { background:#6854c5; }
+        .login-button { min-height:40px; border-color:#e5e2ec; border-radius:10px; font-size:12px; }
+        .intro { margin-bottom:24px; display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+        .intro .add-button { flex-shrink:0; }
+        @media(max-width:600px) { .intro { flex-wrap:wrap; gap:14px; } }
+        .intro h1 { margin:0 0 4px; font-size:28px; font-weight:650; letter-spacing:-1px; }
+        .intro p { margin:0; color:var(--muted); }
+        .stats { gap:16px; margin-bottom:22px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+        .stat { min-height:94px; border-radius:16px; padding:20px; gap:15px; }
+        .stat-icon { width:42px; height:42px; border-radius:13px; }
+        .stat-number { font-size:25px; line-height:1.2; font-weight:650; letter-spacing:-.6px; }
+        .stat-label { font-size:12px; font-weight:500; }
+        .dashboard-grid { grid-template-columns:minmax(0,1fr) 240px; gap:22px; align-items:stretch; }
+        .primary { display:flex; flex-direction:column; min-width:0; max-width:100%; }
+        .sheet { min-width:0; max-width:100%; }
+        .sheet { flex:1; padding:20px 20px 12px; border-radius:16px; box-shadow:0 4px 20px #30334503; overflow:auto; }
+        .toolbar { flex-wrap:wrap; gap:10px; margin-bottom:23px; }
+        .search-wrap { height:36px; flex:1; min-width:160px; }
+        .search { width:100%; height:36px; border-color:var(--line); border-radius:9px; background:#faf9fc; font-size:12px; padding-left:33px; }
+        .search-icon { top:11px; left:12px; }
+        .filters { background:#f6f5f9; padding:3px; border-radius:9px; }
+        .filter { height:30px; font-size:11px; padding:0 9px; color:#717184; }
+        .filter.active { background:#fff; color:var(--purple); box-shadow:0 1px 4px #30334512; }
+        .sort { height:36px; border-color:var(--line); border-radius:9px; font-size:11px; gap:10px; }
+        .sort::after,.status-button::after,.account-caret { transform:rotate(45deg); position:relative; top:-2px; flex-shrink:0; }
+        table { min-width:640px; }
+        th { font-size:9px; letter-spacing:.09em; font-weight:600; padding:0 10px 14px; }
+        td { padding:16px 10px; font-size:12px; }
+        tbody tr:last-child td { border-bottom:0; }
+        tbody tr:hover { background:#fbfafd; }
+        td:nth-child(4),td:nth-child(5) { white-space:nowrap; color:#7a7d90; font-size:11px; }
+        .company { gap:11px; font-weight:600; }
+        .avatar { width:32px; height:32px; border-radius:10px; background:#e9e5f7; color:#7965ad; font-weight:700; font-size:10px; flex-shrink:0; }
+        tbody tr:nth-child(3n+2) .avatar { background:#e5f0ec; color:#548577; }
+        tbody tr:nth-child(3n+3) .avatar { background:#f5eadd; color:#aa8055; }
+        .pill { padding:7px 10px; font-size:10px; font-weight:600; white-space:nowrap; background:#edf2fd; color:#567abd; }
+        .pill.assessment { background:#f0ebfb; color:#8562bd; }
+        .pill.interview { background:#fff1df; color:#ae7b30; }
+        .pill.offer { background:#e8f4ec; color:#4c9167; }
+        .pill.rejected { background:#faeaee; color:#ba647b; }
+        .delete-button { width:32px; height:32px; border-radius:9px; }
+        .footer { padding-top:12px; font-size:10px; }
+        .sidebar { display:flex; flex-direction:column; gap:14px; padding-bottom:27px; }
+        .side-card { margin:0; padding:18px; border-radius:16px; }
+        .side-card:last-child { margin-top:auto; }
+        .side-card h3 { font-size:12px; font-weight:600; margin-bottom:14px; }
+        .side-card:first-child { background:#fffbf7; border-color:#f4eadd; }
+        .streak { font-size:29px; color:#cd8749; }
+        .side-muted { font-size:11px; font-weight:400; }
+        .progress { height:7px; margin:14px 0 9px; background:#f0edf6; }
+        .progress i { border-radius:8px; background:#9983e5; }
+        .bars { height:60px; margin-top:12px; border:0; gap:8px; }
+        .bars i { background:#b3a4eb; border-radius:4px 4px 2px 2px; }
+        .week span { border:0; }
+        .modal { z-index:20; backdrop-filter:blur(5px); background:#30334545; padding:20px; }
+        .modal-card { width:390px; max-width:100%; padding:28px; border-radius:20px; box-shadow:0 24px 80px #30334525; }
+        .modal-card h2 { font-size:21px; letter-spacing:-.5px; }
+        .modal-card input,.status-modal select { min-height:44px; border-radius:9px; font:inherit; }
+        .cancel,.danger { border-radius:10px; }
+        .account-menu { top:45px; width:220px; border-radius:14px; padding:16px; }
+        @media(max-width:1100px) { .dashboard-grid { grid-template-columns:1fr; } .sidebar { display:grid; grid-template-columns:repeat(4,1fr); padding:0; gap:12px; } .side-card:last-child { margin-top:0; } }
+        @media(max-width:700px) { .page { padding:20px 16px; } header { flex-wrap:wrap; margin-bottom:22px; } .header-actions { flex-wrap:wrap; gap:8px; } .header-streak { display:none; } .intro h1 { font-size:25px; } .stats { gap:10px; } .stat { padding:14px; min-height:80px; } .sidebar { grid-template-columns:repeat(2,1fr); } .sheet { padding:16px 12px; } .filters { order:3; } }
+        @media(max-width:800px) { .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        @media(prefers-reduced-motion:reduce) { button { transition:none; } }
+        .details-dialog{border:1px solid var(--line);border-radius:20px;padding:28px;width:480px;max-width:calc(100vw - 32px);max-height:90vh;color:var(--ink);box-shadow:0 24px 80px #30334525}
+        .details-dialog::backdrop{background:#30334545;backdrop-filter:blur(5px)}
+        .details-dialog h2{margin:0 0 18px;font-size:21px}
+        .details-dialog form{display:grid;gap:12px}.details-dialog label{display:grid;gap:5px;font-weight:600;font-size:12px}
+        .details-dialog input,.details-dialog textarea{width:100%;border:1px solid #ddd9e8;border-radius:9px;padding:10px;font:inherit;color:var(--ink);background:#faf9fc}
+        .details-dialog textarea{resize:vertical;min-height:125px}.details-dialog a{color:var(--purple)}
+        #details-error{color:#a14861;margin:0}#applications-table tr{cursor:pointer}
+    </style>
+</head>
+<body>
+<div class="page"><p id="request-error" role="alert" hidden style="padding:12px;background:#faeaee;color:#a14861;border-radius:10px"></p>
+    <header><a class="brand" href="/start" aria-label="Application Tracker home"><span class="brand-icon">▣</span>Application Tracker</a><div class="header-actions"><span class="header-streak">🔥 <span id="header-streak-count">0</span> day streak</span><div class="account"><button class="login-button" id="login-button" onclick="location.href='/auth/google'">Log in / Register</button><button class="account-button" id="account-button" aria-label="Open account menu"><span class="account-avatar" id="account-avatar">U</span></button><div class="account-menu" id="account-menu"><div class="account-name" id="account-name"></div><div class="account-email" id="account-email"></div><a class="account-link" href="/start#goals">Your goals</a><button class="logout-button" id="logout-button">↪ &nbsp; Log out</button></div></div></div></header>
+    <div class="intro"><div><h1>A little progress, every day.</h1><p>Your applications, next steps, and small wins. All in one place.</p></div><button class="add-button" id="open-modal">＋ Add application</button></div>
+    <section class="stats">
+        <div class="stat"><div class="stat-icon">▤</div><div><span class="stat-number" id="application-count">0</span><span class="stat-label">Applications</span></div></div>
+        <div class="stat"><div class="stat-icon">⌁</div><div><span class="stat-number" id="active-count">0</span><span class="stat-label">Active</span></div></div>
+        <div class="stat"><div class="stat-icon">▣</div><div><span class="stat-number" id="interview-count">0</span><span class="stat-label">Interview</span></div></div>
+        <div class="stat"><div class="stat-icon">♧</div><div><span class="stat-number" id="offer-count">0</span><span class="stat-label">Offers</span></div></div>
+    </section>
+    <div class="dashboard-grid"><div class="primary">
+    <section class="sheet">
+        <div class="toolbar"><div class="search-wrap"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input class="search" id="search-term" placeholder="Search applications..."></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="active">Active</button><button class="filter" data-filter="interview">Interview</button><button class="filter" data-filter="offer">Offer</button><button class="filter" data-filter="rejected">Rejected</button></div><button class="sort">Sort: Recently updated</button></div>
+        <table><thead><tr><th>COMPANY</th><th>ROLE</th><th>STAGE</th><th>APPLIED</th><th>LAST UPDATED</th><th></th></tr></thead><tbody id="applications-table"></tbody></table>
+    </section>
+    <div class="footer">One step closer. Click a stage to update your progress.</div>
+    </div><aside class="sidebar">
+        <div class="side-card"><h3>Your streak</h3><div class="streak">🔥 <span id="streak-count">0</span> <span class="side-muted">day streak</span></div><p class="side-muted">Based on applications added daily.</p></div>
+        <div class="side-card"><h3>Today’s goal <span style="float:right;color:var(--purple);font-weight:400">Goal: 5</span></h3><b><span id="today-count">0</span> <span class="side-muted">/ 5 applications</span></b><div class="progress"><i id="goal-progress"></i></div><span class="side-muted" id="goal-message">5 more to go!</span></div>
+        <div class="side-card"><h3>This week</h3><b style="font-size:18px" id="week-total">0</b><div class="side-muted">applications</div><div class="bars" id="activity-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="week"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div></div>
+        <div class="side-card"><h3>Stats</h3><div class="side-muted">🏆 &nbsp; Longest streak <span style="float:right;color:var(--ink)" id="longest-streak">0 days</span></div><br><div class="side-muted">▥ &nbsp; Total applications <span id="sidebar-total" style="float:right;color:var(--ink)">0</span></div></div>
+    </aside></div>
+</div>
+<div class="modal" id="modal"><div class="modal-card"><h2>Add application</h2><form id="application-form"><input id="company" placeholder="Company" required><input id="role" placeholder="Role" required><div class="modal-actions"><button class="cancel" type="button" id="close-modal">Cancel</button><button class="add-button" type="submit">Add application</button></div></form></div></div>
+<div class="modal" id="delete-modal"><div class="modal-card"><h2>Delete application?</h2><p>This action cannot be undone.</p><div class="modal-actions"><button class="cancel" id="cancel-delete">Cancel</button><button class="danger" id="confirm-delete">Delete application</button></div></div></div>
+<div class="modal status-modal" id="status-modal"><div class="modal-card"><h2>Update status</h2><select id="new-status"><option>Applied</option><option>Online Assessment</option><option>Rejected</option><option>Interview In Progress</option><option>Offer</option></select><div class="modal-actions"><button class="cancel" id="cancel-status">Cancel</button><button class="add-button" id="confirm-status">Save status</button></div></div></div>
+<dialog class="details-dialog" id="details-dialog" aria-labelledby="details-title">
+<h2 id="details-title">Application details</h2>
+<form id="details-form">
+<label>Company<input id="detail-company" required maxlength="200"></label>
+<label>Role<input id="detail-role" required maxlength="200"></label>
+<label>Job posting link (optional)<input id="detail-url" type="url" placeholder="https://…"></label>
+<a id="detail-open-link" target="_blank" rel="noopener noreferrer" hidden>Open job posting ↗</a>
+<label>Notes (optional)<textarea id="detail-notes" maxlength="10000" placeholder="Recruiter details, interview prep, or anything to remember…"></textarea></label>
+<p id="details-error" role="alert" hidden></p>
+<div class="modal-actions"><button class="cancel" id="details-close" type="button">Cancel</button><button class="add-button" id="details-save" type="submit">Save changes</button></div>
+</form></dialog>
+<script>
+async function checkedFetch(url, options) {
+ const response = await fetch(url, options);
+ if (!response.ok) {
+  if (response.status === 401) location.href='/start';
+  throw new Error(response.status === 401 ? 'Please sign in again.' : 'Could not save or load your data. Please try again.');
+ }
+ return response;
+}
+window.addEventListener('unhandledrejection', event=>{
+ const message=document.getElementById('request-error');
+ message.textContent=event.reason?.message||'Something went wrong. Please try again.';
+ message.hidden=false;
+ event.preventDefault();
+});
+
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const detailsDialog=document.getElementById('details-dialog');
+let detailId=null;
+function updatePostingLink(){
+ const link=document.getElementById('detail-open-link');
+ try{const url=new URL(document.getElementById('detail-url').value);if(!['http:','https:'].includes(url.protocol))throw new Error();link.href=url.href;link.hidden=false;}
+ catch{link.hidden=true;link.removeAttribute('href');}
+}
+function openDetails(application){
+ detailId=application.id;
+ for(const [field,value] of Object.entries({company:application.company,role:application.role,url:application.job_url||'',notes:application.notes||''}))document.getElementById('detail-'+field).value=value;
+ document.getElementById('details-error').hidden=true;
+ updatePostingLink();detailsDialog.showModal();
+}
+document.getElementById('detail-url').oninput=updatePostingLink;
+document.getElementById('details-close').onclick=()=>detailsDialog.close();
+document.getElementById('details-form').onsubmit=async event=>{
+ event.preventDefault();const save=document.getElementById('details-save'),error=document.getElementById('details-error');save.disabled=true;error.hidden=true;
+ try{
+  const response=await checkedFetch('/applications/'+detailId+'/details',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({company:document.getElementById('detail-company').value.trim(),role:document.getElementById('detail-role').value.trim(),job_url:document.getElementById('detail-url').value.trim()||null,notes:document.getElementById('detail-notes').value})});
+  if(!response.ok){const body=await response.json();throw new Error(typeof body.detail==='string'?body.detail:'Check the fields and use an http or https job link.');}
+  await load();detailsDialog.close();
+ }catch(problem){error.textContent=problem.message||'Could not save. Please try again.';error.hidden=false;}finally{save.disabled=false;}
+};
+const table=document.getElementById('applications-table'), modal=document.getElementById('modal'), deleteModal=document.getElementById('delete-modal'), statusModal=document.getElementById('status-modal'), form=document.getElementById('application-form'); let currentFilter='all', pendingDeleteId=null, pendingStatusId=null, sortNewest=true;
+async function loadUser(){const user=await checkedFetch('/auth/me').then(r=>r.json());if(user){document.getElementById('login-button').style.display='none';const accountButton=document.getElementById('account-button');accountButton.style.display='inline-flex';document.getElementById('account-avatar').textContent=(user.name||user.email||'U').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();document.getElementById('account-name').textContent=user.name||'Google user';document.getElementById('account-email').textContent=user.email;accountButton.onclick=()=>document.getElementById('account-menu').classList.toggle('open');document.getElementById('logout-button').onclick=async()=>{await checkedFetch('/auth/logout',{method:'POST'});location.reload();};}}
+function formatDate(value){if(!value)return '—';const date=new Date(value.replace(' ','T')+'Z');return date.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+function formatRelativeDate(value){if(!value)return '—';const date=new Date(value.replace(' ','T')+'Z');const days=Math.floor((Date.now()-date.getTime())/86400000);if(days<=0)return 'Today';return days+' day'+(days===1?'':'s')+' ago';}
+function filtered(items){return items.filter(a=>currentFilter==='all'||(currentFilter==='active'&&['Applied','Online Assessment','Interview In Progress'].includes(a.status))||(currentFilter==='interview'&&a.status==='Interview In Progress')||(currentFilter==='offer'&&a.status==='Offer')||(currentFilter==='rejected'&&a.status==='Rejected'));}
+function display(items){items=filtered(items); table.innerHTML=items.length?'':'<tr><td colspan="6" class="footer">No applications found</td></tr>'; for(const a of items){const r=document.createElement('tr');const initials=a.company.slice(0,2).toUpperCase();const stageClass=a.status==='Online Assessment'?'assessment':a.status==='Interview In Progress'?'interview':a.status==='Offer'?'offer':a.status==='Rejected'?'rejected':'';r.innerHTML=`<td><div class="company"><span class="avatar">${escapeHtml(initials)}</span><span>${escapeHtml(a.company)}<small class="sub">${escapeHtml(a.company.toLowerCase())}.com</small></span></div></td><td>${escapeHtml(a.role)}</td><td><button class="pill status-button ${stageClass}" data-id="${a.id}">${a.status}</button></td><td>${formatDate(a.created_at)}</td><td>${formatRelativeDate(a.updated_at)}</td><td><button class="delete-button" data-id="${a.id}" aria-label="Delete ${escapeHtml(a.company)}" title="Delete application"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7l1-3h4l1 3"></path></svg></button></td>`;r.querySelector('.status-button').onclick=updateStatus;r.querySelector('.delete-button').onclick=deleteApplication;r.tabIndex=0;r.title="Open application details";r.onclick=e=>{if(!e.target.closest("button"))openDetails(a,r);};r.onkeydown=e=>{if(e.target===r&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetails(a,r);}};table.appendChild(r);}}
+let loadVersion=0;async function load(){const version=++loadVersion;const [recent,stats]=await Promise.all([checkedFetch(document.getElementById('search-term').value.trim()?'/applications/search?company='+encodeURIComponent(document.getElementById('search-term').value.trim()):'/applications/recent').then(r=>r.json()),checkedFetch('/applications/stats').then(r=>r.json())]);if(version!==loadVersion)return;recent.sort((a,b)=>sortNewest?b.updated_at.localeCompare(a.updated_at)||b.id-a.id:a.updated_at.localeCompare(b.updated_at)||a.id-b.id);display(recent);for(const [id,val] of Object.entries({'longest-streak':stats.longest_streak+' days','application-count':stats.total,'active-count':stats.active,'interview-count':stats.interviews,'offer-count':stats.offers,'sidebar-total':stats.total,'streak-count':stats.streak,'header-streak-count':stats.streak,'today-count':stats.today_count,'week-total':stats.week_total}))document.getElementById(id).textContent=val;document.getElementById('goal-progress').style.width=Math.min(stats.today_count/5*100,100)+'%';document.getElementById('goal-message').textContent=stats.today_count>=5?'Goal complete!':(5-stats.today_count)+' more to go!';const bars=document.querySelectorAll('#activity-bars i');const max=Math.max(...stats.week_activity,1);stats.week_activity.forEach((count,index)=>bars[index].style.height=Math.max(count/max*85,8)+'%');}
+function updateStatus(e){pendingStatusId=e.target.dataset.id;document.getElementById('new-status').value=e.target.closest('tr').querySelector('.status-button').textContent.replace('⌄','');statusModal.classList.add('open');}
+document.getElementById('confirm-status').onclick=async()=>{await checkedFetch('/applications/'+pendingStatusId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:document.getElementById('new-status').value})});statusModal.classList.remove('open');await load();}
+document.getElementById('cancel-status').onclick=()=>statusModal.classList.remove('open');
+function deleteApplication(e){pendingDeleteId=e.currentTarget.dataset.id;deleteModal.classList.add('open');}
+document.getElementById('cancel-delete').onclick=()=>deleteModal.classList.remove('open');
+document.getElementById('confirm-delete').onclick=async()=>{await checkedFetch('/applications/'+pendingDeleteId,{method:'DELETE'});deleteModal.classList.remove('open');await load();}
+document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{currentFilter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');load();});
+let searchTimer;document.getElementById('search-term').oninput=()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>load(),200);};
+document.getElementById('open-modal').onclick=()=>modal.classList.add('open');document.getElementById('close-modal').onclick=()=>modal.classList.remove('open');
+document.querySelector('.sort').onclick=()=>{sortNewest=!sortNewest;document.querySelector('.sort').firstChild.textContent=sortNewest?'Sort: Recently updated':'Sort: Oldest updated';load();};
+form.onsubmit=async e=>{e.preventDefault();await checkedFetch('/applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({company:company.value,role:role.value,status:'Applied'})});form.reset();modal.classList.remove('open');await load();}; loadUser(); load();
+document.addEventListener('click',()=>document.querySelectorAll('.action-menu').forEach(m=>m.classList.remove('open')));
+</script>
+</body>
+</html>
