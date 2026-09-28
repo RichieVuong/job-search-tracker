@@ -280,7 +280,26 @@ document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{currentFilter=b.d
 let searchTimer;document.getElementById('search-term').oninput=()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>load(),200);};
 document.getElementById('open-modal').onclick=()=>modal.classList.add('open');document.getElementById('close-modal').onclick=()=>modal.classList.remove('open');
 document.querySelector('.sort').onclick=()=>{sortNewest=!sortNewest;document.querySelector('.sort').firstChild.textContent=sortNewest?'Sort: Recently updated':'Sort: Oldest updated';load();};
-form.onsubmit=async e=>{e.preventDefault();await checkedFetch('/applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({company:company.value,role:role.value,status:'Applied'})});form.reset();modal.classList.remove('open');await load();}; loadUser(); load();
+let addingApplication=false;
+form.onsubmit=async e=>{
+  e.preventDefault();
+  if(addingApplication)return;
+  addingApplication=true;
+  const submitButton=form.querySelector('[type="submit"]');
+  submitButton.disabled=true;
+  submitButton.textContent='Adding…';
+  try{
+    await checkedFetch('/applications',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({company:document.getElementById('company').value,role:document.getElementById('role').value,status:'Applied'})});
+    form.reset();
+    modal.classList.remove('open');
+    await load();
+  }finally{
+    addingApplication=false;
+    submitButton.disabled=false;
+    submitButton.textContent='Add application';
+  }
+};
+loadUser(); load();
 document.addEventListener('click',()=>document.querySelectorAll('.action-menu').forEach(m=>m.classList.remove('open')));
 </script>
 </body>
