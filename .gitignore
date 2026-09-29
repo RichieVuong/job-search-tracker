@@ -7,6 +7,7 @@
 __pycache__/
 *.pdf
 *.png
+!docs/images/*.png
 *.tex
 backups/
 tmp/
