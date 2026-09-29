@@ -10,14 +10,11 @@ Google sign-in is required to use the tracker. If the deployment is unavailable,
 
 ## Screenshots
 
-The live landing page at a narrow browser width. The example applications displayed on this page are sample data.
+Focused captures of the live website at a narrow browser width. The tracker preview shows the landing page's sample data, not a signed-in account.
 
-<details>
-<summary>View landing page screenshot</summary>
-
-<img src="docs/images/landing.png" alt="Application Tracker landing page with features, about, and goals sections" width="400">
-
-</details>
+| Landing page | Sample tracker preview | Why I built it |
+| --- | --- | --- |
+| ![Landing page introduction](docs/images/landing-hero.png) | ![Sample application preview](docs/images/tracker-preview.png) | ![Project story](docs/images/about.png) |
 
 ## Why I built it
 
