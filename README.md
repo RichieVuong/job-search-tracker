@@ -4,9 +4,20 @@ A full-stack application for organizing job applications, tracking hiring stages
 
 **Python · FastAPI · JavaScript · HTML/CSS · SQL · PostgreSQL · Google OAuth**
 
-[Open the live app](https://job-search-tracker-nabf.onrender.com/start) · [Screenshot guide](docs/SHOWCASE.md)
+[Open the live app](https://job-search-tracker-nabf.onrender.com/start)
 
 Google sign-in is required to use the tracker. If the deployment is unavailable, the source and local setup instructions below remain available.
+
+## Screenshots
+
+The live landing page at a narrow browser width. The example applications displayed on this page are sample data.
+
+<details>
+<summary>View landing page screenshot</summary>
+
+<img src="docs/images/landing.png" alt="Application Tracker landing page with features, about, and goals sections" width="400">
+
+</details>
 
 ## Why I built it
 
